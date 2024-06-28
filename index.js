@@ -115,4 +115,10 @@ function drawChart() {
     }
 }
 
-document.getElementById('drawChartButton').addEventListener('click', drawChart);
+document.getElementById('drawChartButton').addEventListener('click', () => {
+    try {
+        drawChart();
+    } catch (error) {
+        console.error("Unexpected error:", error);
+    }
+});
