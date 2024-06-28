@@ -5,9 +5,16 @@ function handleFileUpload(event) {
     if (file) {
         const reader = new FileReader();
         reader.onload = function(e) {
-            const data = d3.csvParse(e.target.result);
-            populateDropdowns(data.columns);
-            drawChart(data);
+            try {
+                const data = d3.csvParse(e.target.result);
+                populateDropdowns(data.columns);
+                drawChart(data);
+            } catch (error) {
+                console.error("Error parsing CSV file:", error);
+            }
+        };
+        reader.onerror = function(error) {
+            console.error("Error reading file:", error);
         };
         reader.readAsText(file);
     }
@@ -30,48 +37,63 @@ function populateDropdowns(columns) {
     });
 }
 
+function clearChart() {
+    d3.select("#chart").selectAll("*").remove();
+}
+
 function drawChart(data) {
-    const svg = d3.select("#chart").append("svg")
-        .attr("width", 800)
-        .attr("height", 400);
+    clearChart();
 
     const xAxis = document.getElementById('xAxis').value;
     const yAxis = document.getElementById('yAxis').value;
     const category = document.getElementById('category').value;
     const series = document.getElementById('series').value;
 
-    const groupedData = d3.groups(data, d => d[category]);
+    if (!xAxis || !yAxis || !category || !series) {
+        console.error("Please select valid options for all dropdowns.");
+        return;
+    }
 
-    const x = d3.scaleBand()
-        .domain(groupedData.map(d => d[0]))
-        .range([0, 800])
-        .padding(0.1);
+    try {
+        const svg = d3.select("#chart").append("svg")
+            .attr("width", 800)
+            .attr("height", 400);
 
-    const y = d3.scaleLinear()
-        .domain([0, d3.max(groupedData, d => d3.sum(d[1], d => +d[yAxis]))])
-        .nice()
-        .range([400, 0]);
+        const groupedData = d3.groups(data, d => d[category]);
 
-    const color = d3.scaleOrdinal(d3.schemeCategory10);
+        const x = d3.scaleBand()
+            .domain(groupedData.map(d => d[0]))
+            .range([0, 800])
+            .padding(0.1);
 
-    svg.append("g")
-        .selectAll("g")
-        .data(groupedData)
-        .enter().append("g")
-        .attr("transform", d => `translate(${x(d[0])},0)`)
-        .selectAll("rect")
-        .data(d => d[1])
-        .enter().append("rect")
-        .attr("x", d => x(d[xAxis]))
-        .attr("y", d => y(d[yAxis]))
-        .attr("width", x.bandwidth())
-        .attr("height", d => 400 - y(d[yAxis]))
-        .attr("fill", d => color(d[series]));
+        const y = d3.scaleLinear()
+            .domain([0, d3.max(groupedData, d => d3.sum(d[1], d => +d[yAxis]))])
+            .nice()
+            .range([400, 0]);
 
-    svg.append("g")
-        .attr("transform", "translate(0,400)")
-        .call(d3.axisBottom(x));
+        const color = d3.scaleOrdinal(d3.schemeCategory10);
 
-    svg.append("g")
-        .call(d3.axisLeft(y));
+        svg.append("g")
+            .selectAll("g")
+            .data(groupedData)
+            .enter().append("g")
+            .attr("transform", d => `translate(${x(d[0])},0)`)
+            .selectAll("rect")
+            .data(d => d[1])
+            .enter().append("rect")
+            .attr("x", d => x(d[xAxis]))
+            .attr("y", d => y(d[yAxis]))
+            .attr("width", x.bandwidth())
+            .attr("height", d => 400 - y(d[yAxis]))
+            .attr("fill", d => color(d[series]));
+
+        svg.append("g")
+            .attr("transform", "translate(0,400)")
+            .call(d3.axisBottom(x));
+
+        svg.append("g")
+            .call(d3.axisLeft(y));
+    } catch (error) {
+        console.error("Error drawing chart:", error);
+    }
 }
