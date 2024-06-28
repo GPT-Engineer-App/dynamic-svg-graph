@@ -10,6 +10,10 @@ function handleFileUpload(event) {
             try {
                 const data = d3.csvParse(e.target.result);
                 console.log("CSV Data:", data);
+                if (data.length === 0) {
+                    console.error("Parsed data is empty.");
+                    return;
+                }
                 globalData = data;
                 populateDropdowns(data.columns);
                 document.getElementById('drawChartButton').disabled = false;
