@@ -63,6 +63,11 @@ function drawChart() {
         return;
     }
 
+    if (!globalData[0].hasOwnProperty(xAxis) || !globalData[0].hasOwnProperty(yAxis) || !globalData[0].hasOwnProperty(category) || !globalData[0].hasOwnProperty(series)) {
+        console.error("Selected columns do not exist in the data.");
+        return;
+    }
+
     try {
         console.log("Drawing chart with data:", globalData);
         const svg = d3.select("#chart").append("svg")
