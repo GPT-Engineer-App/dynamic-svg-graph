@@ -48,6 +48,11 @@ function clearChart() {
 function drawChart() {
     clearChart();
 
+    if (globalData.length === 0) {
+        console.error("No data available to draw the chart.");
+        return;
+    }
+
     const xAxis = document.getElementById('xAxis').value;
     const yAxis = document.getElementById('yAxis').value;
     const category = document.getElementById('category').value;
@@ -65,6 +70,8 @@ function drawChart() {
             .attr("height", 400);
 
         const groupedData = d3.groups(globalData, d => d[category]);
+
+        console.log("Grouped Data:", groupedData);
 
         const x = d3.scaleBand()
             .domain(groupedData.map(d => d[0]))
