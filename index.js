@@ -7,8 +7,9 @@ function handleFileUpload(event) {
         reader.onload = function(e) {
             try {
                 const data = d3.csvParse(e.target.result);
+                console.log("CSV Data:", data);
                 populateDropdowns(data.columns);
-                drawChart(data);
+                document.getElementById('drawChartButton').disabled = false;
             } catch (error) {
                 console.error("Error parsing CSV file:", error);
             }
@@ -26,14 +27,14 @@ function populateDropdowns(columns) {
     const category = document.getElementById('category');
     const series = document.getElementById('series');
 
-    columns.forEach(column => {
-        const option = document.createElement('option');
-        option.value = column;
-        option.text = column;
-        xAxis.appendChild(option.cloneNode(true));
-        yAxis.appendChild(option.cloneNode(true));
-        category.appendChild(option.cloneNode(true));
-        series.appendChild(option.cloneNode(true));
+    [xAxis, yAxis, category, series].forEach(dropdown => {
+        dropdown.innerHTML = '';
+        columns.forEach(column => {
+            const option = document.createElement('option');
+            option.value = column;
+            option.text = column;
+            dropdown.appendChild(option.cloneNode(true));
+        });
     });
 }
 
@@ -41,7 +42,7 @@ function clearChart() {
     d3.select("#chart").selectAll("*").remove();
 }
 
-function drawChart(data) {
+function drawChart() {
     clearChart();
 
     const xAxis = document.getElementById('xAxis').value;
@@ -97,3 +98,5 @@ function drawChart(data) {
         console.error("Error drawing chart:", error);
     }
 }
+
+document.getElementById('drawChartButton').addEventListener('click', drawChart);
