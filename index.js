@@ -76,6 +76,11 @@ function drawChart() {
 
         const groupedData = d3.groups(globalData, d => d[category]);
 
+        if (groupedData.length === 0) {
+            console.error("No data available after grouping.");
+            return;
+        }
+
         console.log("Grouped Data:", groupedData);
 
         const x = d3.scaleBand()
