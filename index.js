@@ -1,3 +1,5 @@
+let globalData = [];
+
 document.getElementById('fileInput').addEventListener('change', handleFileUpload);
 
 function handleFileUpload(event) {
@@ -8,6 +10,7 @@ function handleFileUpload(event) {
             try {
                 const data = d3.csvParse(e.target.result);
                 console.log("CSV Data:", data);
+                globalData = data;
                 populateDropdowns(data.columns);
                 document.getElementById('drawChartButton').disabled = false;
             } catch (error) {
@@ -56,11 +59,12 @@ function drawChart() {
     }
 
     try {
+        console.log("Drawing chart with data:", globalData);
         const svg = d3.select("#chart").append("svg")
             .attr("width", 800)
             .attr("height", 400);
 
-        const groupedData = d3.groups(data, d => d[category]);
+        const groupedData = d3.groups(globalData, d => d[category]);
 
         const x = d3.scaleBand()
             .domain(groupedData.map(d => d[0]))
